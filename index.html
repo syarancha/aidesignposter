@@ -29,8 +29,8 @@
   </head>
   <body>
     <!-- A-Frame 장면 정의: mindar-image 속성으로 이미지 추적을 설정합니다. -->
-    <a-scene
-      mindar-image="imageTargetSrc: https://cdn.jsdelivr.net/gh/hiukim/mind-ar-js@1.2.5/examples/image-tracking/assets/card-example/card.mind;"
+   <a-scene
+  mindar-image="imageTargetSrc: targets.mind;"
       vr-mode-ui="enabled: false"
       device-orientation-permission-ui="enabled: false"
       color-space="sRGB"
@@ -64,7 +64,7 @@
           position="0 0 0"
           rotation="0 0 0"
           width="1"
-          height="0.5625"
+          height="1.25"
           material="shader: flat; src: #overlayVideo"
         ></a-plane>
       </a-entity>
