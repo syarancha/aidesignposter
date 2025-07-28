@@ -83,42 +83,22 @@
       </a-entity>
     </a-scene>
 
-    <script>
-      // 이미지 평면, 비디오 평면, 비디오 엘리먼트 참조
-      const imagePlane = document.querySelector('#imagePlane');
-      const videoPlane = document.querySelector('#videoPlane');
-      const videoEl = document.querySelector('#overlayVideo');
-      const target = document.querySelector('[mindar-image-target]');
-      const delayMs = 2000; // 영상 전환 딜레이(밀리초). 원하면 수정 가능
+<script>
+  const videoEl = document.querySelector('#overlayVideo');
+  const target  = document.querySelector('[mindar-image-target]');
+  const delayMs = 2000; // 지연시간: 2초
 
-      let timeoutId;
+  target.addEventListener('targetFound', () => {
+    // 일정 시간 후 비디오 재생
+    setTimeout(() => {
+      videoEl.play().catch(() => {});
+    }, delayMs);
+  });
 
-      target.addEventListener('targetFound', () => {
-        // 타깃 인식 시 우선 포스터 이미지를 보여주고 비디오 평면을 숨깁니다.
-        imagePlane.setAttribute('visible', true);
-        videoPlane.setAttribute('visible', false);
-        // 기존 예약이 있으면 취소합니다.
-        if (timeoutId) {
-          clearTimeout(timeoutId);
-        }
-        // delayMs 이후에 이미지 평면을 숨기고 비디오 평면을 보여주며 비디오를 재생합니다.
-        timeoutId = setTimeout(() => {
-          imagePlane.setAttribute('visible', false);
-          videoPlane.setAttribute('visible', true);
-          videoEl.play().catch(() => {});
-        }, delayMs);
-      });
-
-      target.addEventListener('targetLost', () => {
-        // 타깃을 놓치면 예약된 재생을 취소하고 초기 상태로 돌립니다.
-        if (timeoutId) {
-          clearTimeout(timeoutId);
-          timeoutId = null;
-        }
-        videoEl.pause();
-        videoPlane.setAttribute('visible', false);
-        imagePlane.setAttribute('visible', true);
-      });
-    </script>
+  target.addEventListener('targetLost', () => {
+    // 타깃을 놓치면 비디오 정지
+    videoEl.pause();
+  });
+</script>
   </body>
 </html>
