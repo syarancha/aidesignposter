@@ -70,23 +70,35 @@
       </a-entity>
     </a-scene>
 
-    <script>
-      // HTML5 비디오 엘리먼트를 참조합니다. AR 타겟이 인식되면 재생, 인식이 사라지면 일시정지합니다.
-      const videoEl = document.querySelector('#overlayVideo');
-      const target = document.querySelector('[mindar-image-target]');
-      
-      // MindAR 이벤트 리스너: targetFound, targetLost를 사용하여 비디오를 제어합니다.
-      target.addEventListener('targetFound', () => {
-        // 모바일 브라우저에서 비디오 재생은 사용자 상호작용 이후에만 가능하므로,
-        // 처음 호출 시 play() 가 실패할 수 있습니다. catch 로 오류를 무시합니다.
-        videoEl.play().catch((e) => {
-          console.warn('비디오 재생 실패:', e);
-        });
-      });
-      
-      target.addEventListener('targetLost', () => {
-        videoEl.pause();
-      });
-    </script>
+<!-- 기존 index.html의 script 블록 -->
+<script>
+  // 비디오와 타깃 요소 가져오기
+  const videoEl = document.querySelector('#overlayVideo');
+  const target = document.querySelector('[mindar-image-target]');
+
+  // 지연 시간(밀리초) 설정: 1초 = 1000
+  const delayMs = 1000;
+
+  target.addEventListener('targetFound', () => {
+    // 이전 예약이 있다면 취소
+    if (target.dataset.playTimeout) {
+      clearTimeout(target.dataset.playTimeout);
+    }
+    // delayMs 이후에 영상 재생
+    const timeoutId = setTimeout(() => {
+      videoEl.play().catch(() => {});
+    }, delayMs);
+    target.dataset.playTimeout = timeoutId;
+  });
+
+  target.addEventListener('targetLost', () => {
+    // 예약된 재생을 취소하고 영상 정지
+    if (target.dataset.playTimeout) {
+      clearTimeout(target.dataset.playTimeout);
+      target.dataset.playTimeout = null;
+    }
+    videoEl.pause();
+  });
+</script>
   </body>
 </html>
