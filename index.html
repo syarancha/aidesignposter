@@ -66,6 +66,7 @@
           width="1"
           height="1.25"
           material="shader: flat; src: #overlayVideo"
+          visible="false"
         ></a-plane>
       </a-entity>
     </a-scene>
@@ -73,19 +74,28 @@
     <script>
       // 비디오와 타깃 엘리먼트 참조
       const videoEl = document.querySelector('#overlayVideo');
+      const videoPlaneEl = document.querySelector('#videoPlane');
       const target = document.querySelector('[mindar-image-target]');
-      const delayMs = 1500; // 비디오 재생 지연 시간(밀리초)
+      const delayMs = 2000; // 비디오 재생 지연 시간(밀리초)
+
+      let playTimeout;
 
       target.addEventListener('targetFound', () => {
-        // 일정 시간 후 비디오를 재생합니다. 카메라 화면에서 포스터를 먼저 확인할 수 있습니다.
-        setTimeout(() => {
+        // 타깃을 인식하면 일정 시간 후 비디오가 나타나도록 예약합니다.
+        playTimeout = setTimeout(() => {
+          videoPlaneEl.setAttribute('visible', true);
           videoEl.play().catch(() => {});
         }, delayMs);
       });
 
       target.addEventListener('targetLost', () => {
-        // 타깃을 잃으면 비디오를 일시정지합니다.
+        // 타깃을 잃으면 예약된 실행을 취소하고, 비디오와 평면을 숨깁니다.
+        if (playTimeout) {
+          clearTimeout(playTimeout);
+          playTimeout = null;
+        }
         videoEl.pause();
+        videoPlaneEl.setAttribute('visible', false);
       });
     </script>
   </body>
