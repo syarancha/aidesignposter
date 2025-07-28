@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>MindAR 이미지 스캔 비디오 오버레이 데모</title>
+    <!--
+      이 페이지는 MindAR.js 와 A‑Frame을 사용하여 이미지 추적(WebAR)을 구현합니다.
+      사용자가 특정 이미지를 카메라로 비추면 지정된 비디오가 재생됩니다.
+
+      주요 구성 요소:
+      - aframe.min.js: 3D/VR/AR 장면과 엔티티를 정의하기 위한 프레임워크
+      - mindar-image-aframe.prod.js: MindAR의 이미지 추적용 A‑Frame 컴포넌트
+
+      imageTargetSrc 에는 추적할 이미지가 사전 컴파일된 .mind 파일을 지정해야 합니다.
+      여기서는 MindAR 예제에서 제공하는 카드 이미지의 .mind 파일을 사용합니다.
+      실제 프로젝트에서는 본인의 포스터 이미지를
+      https://hiukim.github.io/mind-ar-js-doc/tools/compile/ 에서 .mind 파일로 변환하여
+      그 경로로 교체하면 됩니다.
+    -->
+    <script src="https://aframe.io/releases/1.6.0/aframe.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
+    <style>
+      body {
+        margin: 0;
+        overflow: hidden;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- A-Frame 장면 정의: mindar-image 속성으로 이미지 추적을 설정합니다. -->
+    <a-scene
+      mindar-image="imageTargetSrc: https://cdn.jsdelivr.net/gh/hiukim/mind-ar-js@1.2.5/examples/image-tracking/assets/card-example/card.mind;"
+      vr-mode-ui="enabled: false"
+      device-orientation-permission-ui="enabled: false"
+      color-space="sRGB"
+      renderer="colorManagement: true, physicallyCorrectLights"
+      embedded
+    >
+      <!-- 동영상과 기타 에셋을 선언합니다. -->
+      <a-assets>
+        <!-- 비디오를 preload 하고, autoplay 는 꺼둡니다. autoplay 속성은 mobile safari 등에서 소리가 있을 때 차단됩니다. muted 속성을 지정해 자동 재생이 가능하도록 합니다. -->
+        <video
+          id="overlayVideo"
+          src="video.mp4"
+          preload="auto"
+          loop
+          crossorigin="anonymous"
+          webkit-playsinline
+          playsinline
+          muted
+        ></video>
+      </a-assets>
+
+      <!-- 카메라 설정: look-controls 를 끕니다.  -->
+      <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
+
+      <!-- MindAR 타겟: targetIndex 0 은 .mind 파일 내 첫 번째 이미지에 대응합니다. -->
+      <a-entity mindar-image-target="targetIndex: 0">
+        <!-- a-plane 에 비디오 텍스처를 입혀 AR 대상 위에 표시합니다. 16:9 비율로 맞추기 위해 높이를 0.5625(=9/16) 로 설정합니다. -->
+        <a-plane
+          id="videoPlane"
+          position="0 0 0"
+          rotation="0 0 0"
+          width="1"
+          height="0.5625"
+          material="shader: flat; src: #overlayVideo"
+        ></a-plane>
+      </a-entity>
+    </a-scene>
+
+    <script>
+      // HTML5 비디오 엘리먼트를 참조합니다. AR 타겟이 인식되면 재생, 인식이 사라지면 일시정지합니다.
+      const videoEl = document.querySelector('#overlayVideo');
+      const target = document.querySelector('[mindar-image-target]');
+      
+      // MindAR 이벤트 리스너: targetFound, targetLost를 사용하여 비디오를 제어합니다.
+      target.addEventListener('targetFound', () => {
+        // 모바일 브라우저에서 비디오 재생은 사용자 상호작용 이후에만 가능하므로,
+        // 처음 호출 시 play() 가 실패할 수 있습니다. catch 로 오류를 무시합니다.
+        videoEl.play().catch((e) => {
+          console.warn('비디오 재생 실패:', e);
+        });
+      });
+      
+      target.addEventListener('targetLost', () => {
+        videoEl.pause();
+      });
+    </script>
+  </body>
+</html>
